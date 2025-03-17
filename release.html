@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100vh;
+            display: none;
+            overflow: hidden;
+        }
+
+        button {
+            overflow: hidden;
+            position: relative;
+            margin: 0 4px;
+        }
+
+        button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+            transition: all 0.4s;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        button:hover::after {
+            left: 100%;
+        }
+
+        .ver {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <h1>yee loader</h1>
+        <button class="btn" id="blob" onclick="load('blob')">
+            Open Blob
+        </button>
+        <button class="btn" id="blank" onclick="load('blank')">
+            Open Blank
+        </button>
+    </div>
+    <a class="ver">v1.0</a>
+    <script>
+        let url;
+        async function init() {
+            try {
+                const response = await fetch(
+                    "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz",
+                );
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP error! Status: ${response.status}`,
+                    );
+                }
+
+                const b64 = await response.text();
+
+                const decoded = JSON.parse(atob(b64));
+
+                url = decoded["yee1"];
+            } catch (error) {
+                console.error("Error:", error);
+            }
+            const style = document.createElement("link");
+            style.href = `${url}data/style.css`;
+            style.rel = "stylesheet";
+            const style2 = document.createElement("link");
+            style2.href = `${url}data/button.css`;
+            style2.rel = "stylesheet";
+            document.head.appendChild(style);
+            document.head.appendChild(style2);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            init();
+            if (location !== window.parent.location) {
+                document.documentElement.borderRadius = "2vh";
+            }
+            if (location.protocol === "file:") {
+                document.querySelector("#blob").remove();
+                const blank = document.querySelector("#blank");
+                blank.textContent = "Open";
+                blank.style = "transform: scale(1.2);";
+                document.querySelector(".content h1").style = "transform: scale(1.2);";
+            }
+        });
+
+        function load(type) {
+            const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          embed {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: none;
+          }
+        </style>
+      </head>
+      <body>
+        <embed src="${url}"></embed>
+      </body>
+      </html>
+    `;
+
+            let openURL;
+            let initCode;
+
+            if (type === "blob") {
+                const blob = new Blob([html], {
+                    type: "text/html"
+                });
+                openURL = URL.createObjectURL(blob);
+            } else if (type === "blank") {
+                openURL = "about:blank";
+                initCode = `
+          opened.document.documentElement.innerHTML = html;
+        `;
+            }
+
+            const opened = window.open(openURL, "_blank");
+
+            if (initCode) {
+                eval(initCode);
+            }
+        }
+    </script>
+</body>
+
+</html>
