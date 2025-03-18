@@ -10,7 +10,6 @@
             justify-content: center;
             text-align: center;
             height: 100vh;
-            display: none;
             overflow: hidden;
         }
 
@@ -33,11 +32,60 @@
         .cred {
             right: 0;
         }
+
+        .loader {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #1e1e1e;
+            color: #fff;
+            z-index: 1000;
+        }
+
+        .loader>div {
+            width: 200px;
+            height: 20px;
+            background: #fff;
+            border: 1px solid #fff;
+            outline: 1px solid #000;
+        }
+
+        .loader>div>div {
+            width: 0;
+            height: 100%;
+            background: #FF4545;
+            transition: width 0.5s;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 10px;
+        }
+
+        .loader>div>span {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 24px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <div class="content">
+    <div class="loader">
+        <div>
+            <div></div>
+            <span>Loading (%)</span>
+        </div>
+    </div>
+    <div class="content hidden">
         <h1>yee loader</h1>
         <button class="btn" id="blob" onclick="load('blob')">
             Open Blob
@@ -46,16 +94,37 @@
             Open Blank
         </button>
     </div>
-    <a class="ver">v1.1_1</a>
-    <a class="cred">Made by Colbster937</a>
+    <a class="ver hidden">v1.2</a>
+    <a class="cred hidden">Made by Colbster937</a>
     <script>
         let url;
-        async function init() {
+        let checkprogress = 0;
+        let loadprogress = 0;
+        let loadingText = {};
+
+        async function checkURL(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.status === 200 || !response.ok) throw new Error();
+                const data = await response.text() || await response.json();
+                return {
+                    status: true,
+                    data
+                };
+            } catch {
+                return {
+                    status: false,
+                    data: null
+                };
+            }
+        }
+
+        async function init(git_url) {
             try {
                 const response = await fetch(
-                    "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz",
+                    git_url,
                 );
-                if (!response.ok) {
+                if (!response.status === 200 || !response.ok) {
                     throw new Error(
                         `HTTP error! Status: ${response.status}`,
                     );
@@ -65,22 +134,85 @@
 
                 const decoded = JSON.parse(atob(b64));
 
-                url = decoded["yee1"];
+                const array = Object.entries(decoded);
+
+                let i = 0;
+
+                for (const [num, url2] of array) {
+                    i++
+                    const fullURL = `${url2.replace(/^(https?:\/\/[^\/]+)\/index\.html$/, "$1/")}`;
+                    const urlCheck = `${fullURL}data/onlineCheck.txt`;
+                    const response = await checkURL(urlCheck);
+                    checkprogress = (i / array.length);
+                    if (response.status) {
+                        if (!url) url = fullURL;
+                        updateBar();
+                    } else {
+                        updateBar();
+                    }
+                }
+
+                if (!url) {
+                    if (confirm("No working URLs found, use new github?")) {
+                        await init(prompt("Enter github url",
+                            "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
+                            ));
+                        return;
+                    } else {
+                        return;
+                    }
+                }
             } catch (error) {
                 console.error("Error:", error);
             }
-            const style = document.createElement("link");
-            style.href = `${url}data/style.css`;
-            style.rel = "stylesheet";
-            const style2 = document.createElement("link");
-            style2.href = `${url}data/button.css`;
-            style2.rel = "stylesheet";
-            document.head.appendChild(style);
-            document.head.appendChild(style2);
+            const styles = ["data/style.css", "data/button.css"];
+            for (let i = 0; i < styles.length; i++) {
+                const response = await fetch(`${url}${styles[i]}`);
+                let data = await response.text();
+                data = data.replace(/url\((?!https?:\/\/)['"]?([^)]+?)['"]?\)/g,
+                    `url(${url}${getFolder(styles[i])}/$1)`);
+                const blob = new Blob([data]);
+                const blobUrl = URL.createObjectURL(blob);
+                const style = document.createElement("link");
+                style.rel = "stylesheet";
+                style.href = blobUrl;
+                await document.head.appendChild(style);
+                loadprogress = ((i + 1) / styles.length);
+                updateBar();
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            init();
+        function getFolder(f) {
+            return f.slice(0, f.lastIndexOf('/')) || f;
+        }
+
+        function showMain() {
+            document.querySelectorAll('.hidden').forEach(el => {
+                el.classList.remove('hidden');
+            });
+            document.querySelector(".loader").remove();
+        }
+
+        function updateBar() {
+            const progress = ((checkprogress * 100) + (loadprogress * 100)) / 2;
+            const progressBar = document.querySelector(".loader > div > div");
+            progressBar.style.width = `${progress}%`;
+            loadingText.element.textContent = loadingText.text.replace("%", `${progress.toFixed(0)}%`);
+            if (progress >= 100) {
+                showMain();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const loadingTextElem = document.querySelector(".loader > div > span");
+            loadingText = {
+                element: loadingTextElem,
+                text: loadingTextElem.textContent
+            };
+            await updateBar();
+            await init(
+                "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
+                );
             if (location !== window.parent.location) {
                 document.documentElement.borderRadius = "2vh";
             }
