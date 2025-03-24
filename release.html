@@ -5,6 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+        * {
+            --bg: #1e1e1e;
+            --font: 'Arial', sans-serif;
+            --color: #fff;
+        }
+
         body {
             align-items: center;
             justify-content: center;
@@ -42,16 +48,16 @@
             position: absolute;
             top: 0;
             left: 0;
-            background: #1e1e1e;
-            color: #fff;
+            background: var(--bg);
+            color: var(--color);
             z-index: 1000;
         }
 
         .loader>div {
             width: 200px;
             height: 20px;
-            background: #fff;
-            border: 1px solid #fff;
+            background: var(--color);
+            border: 1px solid var(--color);
             outline: 1px solid #000;
         }
 
@@ -66,7 +72,7 @@
         }
 
         .loader>div>span {
-            font-family: 'Arial', sans-serif;
+            font-family: var(--font);
             margin: 0;
             padding: 0;
             font-size: 24px;
@@ -75,10 +81,42 @@
         .hidden {
             display: none;
         }
+
+        .noscript {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .noscript * {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 
 <body>
+    <noscript>
+        <div class="noscript">
+            <h1>:(</h1>
+            <h3>It looks like javascript is disabled / blocked, making yee loader useless.</h3>
+        </div>
+    </noscript>
     <div class="loader">
         <div>
             <div></div>
@@ -219,7 +257,8 @@
             if (location !== window.parent.location) {
                 document.documentElement.borderRadius = "2vh";
             }
-            if (location.protocol === "file:") {
+            if (location.protocol === "file:" || location.protocol === "data:" || location.protocol ===
+                "blob:" || location.protocol === "chrome-extension:") {
                 document.querySelector("#blob").remove();
                 const blank = document.querySelector("#blank");
                 blank.textContent = "Open";
