@@ -135,7 +135,7 @@
         Open Data
     </button>-->
     </div>
-    <a class="ver hidden">v1.4</a>
+    <a class="ver hidden">v1.4.1</a>
     <a class="cred hidden">Made by Colbster937</a>
     <script>
         let url;
@@ -217,7 +217,7 @@
                 const style = document.createElement("link");
                 style.rel = "stylesheet";
                 style.href = blobUrl;
-                await document.head.appendChild(style);
+                document.head.appendChild(style);
                 loadprogress = ((i + 1) / styles.length);
                 updateBar();
             }
@@ -250,15 +250,15 @@
                 element: loadingTextElem,
                 text: loadingTextElem.textContent
             };
-            await updateBar();
+            updateBar();
             await init(
                 "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
                 );
             if (location !== window.parent.location) {
                 document.documentElement.borderRadius = "2vh";
             }
-            if (location.protocol === "file:" || location.protocol === "data:" || location.protocol ===
-                "blob:" || location.protocol === "chrome-extension:") {
+            if (top.location.protocol === "file:" || top.location.protocol === "data:" || top.location
+                .protocol === "blob:" || top.location.protocol === "chrome-extension:") {
                 document.querySelector("#blob").remove();
                 const blank = document.querySelector("#blank");
                 blank.textContent = "Open";
