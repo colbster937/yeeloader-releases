@@ -135,7 +135,7 @@
         Open Data
     </button>-->
     </div>
-    <a class="ver hidden">v1.4.1</a>
+    <a class="ver hidden">v1.4.2</a>
     <a class="cred hidden">Made by Colbster937</a>
     <script>
         let url;
@@ -194,17 +194,13 @@
                 }
 
                 if (!url) {
-                    if (confirm("No working URLs found, use new github?")) {
-                        await init(prompt("Enter github url",
-                            "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
-                            ));
-                        return;
-                    } else {
+                    if (!blockPrompt()) {
                         return;
                     }
                 }
             } catch (error) {
                 console.error("Error:", error);
+                blockPrompt();
             }
             const styles = ["data/style.css", "data/button.css"];
             for (let i = 0; i < styles.length; i++) {
@@ -312,6 +308,19 @@
 
             if (initCode) {
                 eval(initCode);
+            }
+        }
+
+        async function blockPrompt() {
+            if (confirm(
+                    "No working URLs found!\nThis could mean that:\n - Github is temporarily down\n - The repository is blocked\n - All links are blocked\n - The asset repository was deleted\n\nWould you like to use a new repo?"
+                    )) {
+                await init(prompt("Enter repository url",
+                    "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
+                    ));
+                return true;
+            } else {
+                return false;
             }
         }
     </script>
