@@ -131,14 +131,16 @@
         <button class="btn" id="blank" onclick="load('blank')">
             Open Blank
         </button>
-        <!--<button class="btn" id="data" onclick="load('data')">
-        Open Data
-    </button>-->
+        <button class="btn" id="data" onclick="load('data')">
+            Open Data
+        </button>
     </div>
-    <a class="ver hidden">v1.4.3</a>
+    <a class="ver hidden">v1.5.0</a>
     <a class="cred hidden">Made by Colbster937</a>
     <script>
+        window.loaderVersion = "1.5.0";
         let url;
+        let urlResp;
         let checkprogress = 0;
         let loadprogress = 0;
         let loadingText = {};
@@ -150,7 +152,8 @@
                 const data = await response.text() || await response.json();
                 return {
                     status: true,
-                    data
+                    data,
+                    raw: response
                 };
             } catch {
                 return {
@@ -186,7 +189,10 @@
                     const response = await checkURL(urlCheck);
                     checkprogress = (i / array.length);
                     if (response.status) {
-                        if (!url) url = fullURL;
+                        if (!url) {
+                            url = fullURL;
+                            urlResp = response.raw;
+                        }
                         updateBar();
                     } else {
                         updateBar();
@@ -197,6 +203,8 @@
                     if (!blockPrompt()) {
                         return;
                     }
+                } else {
+                    update(url);
                 }
             } catch (error) {
                 console.error("Error:", error);
@@ -255,8 +263,10 @@
             }
             if (top.location.protocol === "file:" || top.location.protocol === "data:" || top.location
                 .protocol === "blob:" || top.location.protocol === "chrome-extension:") {
-                document.querySelector("#blob").remove();
                 const blank = document.querySelector("#blank");
+                document.querySelectorAll("button").forEach(el => {
+                    if (el !== blank) el.remove();
+                });
                 blank.textContent = "Open";
                 blank.style = "transform: scale(1.2);";
                 document.querySelector(".content h1").style = "transform: scale(1.2);";
@@ -269,7 +279,7 @@
       <html>
       <head>
         <style>
-          embed {
+          iframe {
             width: 100%;
             height: 100%;
             position: absolute;
@@ -280,7 +290,7 @@
         </style>
       </head>
       <body>
-        <embed src="${url}"></embed>
+        <iframe src="${url}"></iframe>
       </body>
       </html>
     `;
@@ -296,11 +306,11 @@
             } else if (type === "blank") {
                 openURL = "about:blank";
                 initCode = `
-          opened.document.documentElement.innerHTML = html;
+            opened.document.documentElement.innerHTML = html;
         `;
             } else if (type === "data") {
                 openURL = "data:text/html;base64," + btoa(html);
-                prompt("Open this URL in a new tab:", openURL);
+                prompt("Please open this URL in a new tab:", openURL);
                 return;
             }
 
@@ -309,6 +319,42 @@
             if (initCode) {
                 eval(initCode);
             }
+        }
+
+        async function update(url) {
+            try {
+                const res = await fetch(url + 'loader/data.json');
+                const json = await res.json();
+
+                const remoteVersion = json.version;
+                if (compareVersions(remoteVersion, window.loaderVersion) > 0) {
+                    if (confirm(`A new version (${remoteVersion}) is available. Download now?`)) {
+                        const zipRes = await fetch(url + 'loader/loader.zip');
+                        const blob = await zipRes.blob();
+
+                        const blobURL = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobURL;
+                        a.download = 'loader.zip';
+                        a.click();
+                        URL.revokeObjectURL(blobURL);
+                    }
+                }
+            } catch (err) {
+                console.error('Update failed:', err);
+            }
+        }
+
+        function compareVersions(v1, v2) {
+            const a = v1.split('.').map(Number);
+            const b = v2.split('.').map(Number);
+            for (let i = 0; i < Math.max(a.length, b.length); i++) {
+                const n1 = a[i] || 0;
+                const n2 = b[i] || 0;
+                if (n1 > n2) return 1;
+                if (n1 < n2) return -1;
+            }
+            return 0;
         }
 
         async function blockPrompt() {
