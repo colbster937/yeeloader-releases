@@ -135,7 +135,7 @@
         Open Data
     </button>-->
     </div>
-    <a class="ver hidden">v1.4.2</a>
+    <a class="ver hidden">v1.4.3</a>
     <a class="cred hidden">Made by Colbster937</a>
     <script>
         let url;
@@ -247,9 +247,9 @@
                 text: loadingTextElem.textContent
             };
             updateBar();
-            await init(
-                "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
-                );
+            await init(atob(
+                "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL1pZUEhFUlN0dWRpb3MvYXNzZXRzL3JlZnMvaGVhZHMvbWFpbi9lV1ZsYkdGMWJtTm9aWEoxY214eg=="
+                ));
             if (location !== window.parent.location) {
                 document.documentElement.borderRadius = "2vh";
             }
@@ -315,9 +315,9 @@
             if (confirm(
                     "No working URLs found!\nThis could mean that:\n - Github is temporarily down\n - The repository is blocked\n - All links are blocked\n - The asset repository was deleted\n\nWould you like to use a new repo?"
                     )) {
-                await init(prompt("Enter repository url",
-                    "https://raw.githubusercontent.com/ZYPHERStudios/assets/refs/heads/main/eWVlbGF1bmNoZXJ1cmxz"
-                    ));
+                await init(prompt("Enter repository url", atob(
+                    "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL1pZUEhFUlN0dWRpb3MvYXNzZXRzL3JlZnMvaGVhZHMvbWFpbi9lV1ZsYkdGMWJtTm9aWEoxY214eg=="
+                    )));
                 return true;
             } else {
                 return false;
